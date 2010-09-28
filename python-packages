@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+# Filename:      python-packages.sh
+# Description:   Gets the names of the python packages installed.
+# Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
+# Last Modified: Sun 2010-09-19 20:38:53 (-0400)
+
+# IMPORTS {{{1
+
+source bashful-messages
+source bashful-utils
+
+# VARIABLES {{{1
+
+SCRIPT_NAME=$(basename "$0" .sh)
+SCRIPT_ARGS="[NAME]"
+SCRIPT_USAGE="Display the names of the python packages installed."
+SCRIPT_OPTIONS="-p PREFIX    Use PREFIX for distutils directory."
+
+PREFIX=${PREFIX:-$HOME/.local}
+
+# COMMAND-LINE OPTIONS {{{1
+
+unset OPTIND
+while getopts ":hp:" option; do
+    case $option in
+        p) PREFIX=$OPTARG ;;
+        h) usage 0 ;;
+        *) usage 1 ;;
+    esac
+done && shift $(($OPTIND - 1))
+
+#}}}1
+
+DIR=$(python-directory -p "$PREFIX")
+
+find "$DIR" -type d -name "*.egg-info" 2>/dev/null |
+while read dir; do
+    info=$dir/PKG-INFO
+    [[ -f $info ]] || continue
+    grep '^Name:' "$info" | awk -F: '{print $2}' | trim
+done

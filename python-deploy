@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+
+# Filename:      python-deploy.sh
+# Description:   Deploys a python package (local and PyPI)
+# Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
+# Last Modified: Sun 2010-09-05 23:06:21 (-0400)
+
+# This deployment script does the following:
+#     1. Prompt for new version string (with choices)
+#     2. Build python egg and source packages
+#     3. Optionally, uploads to PyPI
+#     4. Installs package locally
+
+# IMPORTS {{{1
+
+source bashful-input
+source bashful-messages
+source bashful-modes
+
+# VARIABLES {{{1
+
+SCRIPT_NAME=$(basename "$0" .sh)
+SCRIPT_ARGS="[DIRECTORY]"
+SCRIPT_USAGE="Deploy a package locally and to PyPI."
+
+interactive ${INTERACTIVE:-1}
+verbose     ${VERBOSE:-1}
+
+# COMMAND-LINE OPTIONS {{{1
+
+unset OPTIND
+while getopts ":hifvq" option; do
+    case $option in
+        i) interactive 1 ;;
+        f) interactive 0 ;;
+
+        v) verbose 1 ;;
+        q) verbose 0 ;;
+
+        h) usage 0 ;;
+        *) usage 1 ;;
+    esac
+done && shift $(($OPTIND - 1))
+
+#}}}1
+
+package()
+{
+    python setup.py sdist egg_info bdist_egg "$@"
+}
+
+PKG_DIR=${1:-$PWD}
+
+cd "$PKG_DIR"
+
+PKG_NAME=$(python setup.py --name) || exit 1
+PKG_VERSION=$(python setup.py --version) || exit 1
+
+PKG_VERSION_PYPI=$(
+        yolk -M "$PKG_NAME" -f version |
+        awk '{print $2}'
+        ) || exit 1
+
+CHOICES=(
+    $(version -M $PKG_VERSION)
+    $(version -m $PKG_VERSION)
+    $(version -b $PKG_VERSION)
+    )
+
+PKG_VERSION_NEW=$(choice -c -p "Increment version from ${PKG_VERSION}?" "${CHOICES[@]}")
+
+if [[ $PKG_VERSION_NEW ]]; then
+    PKG_VERSION=$PKG_VERSION_NEW
+    python-version -V "$PKG_VERSION_NEW"
+fi
+
+if [[ $PKG_VERSION != $PKG_VERSION_PYPI ]] && question -c -p "Upload '$PKG_NAME' to PyPI?"; then
+    info -c "Uploading '$PKG_NAME' to PyPI..."
+    package upload || exit 1
+else
+    package || exit 1
+fi
+
+if question -c -p "Install '$PKG_NAME' to system?"; then
+    info -c "Installing '$PKG_NAME' to system..."
+    pip install -U --user .
+fi

@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# Filename:      python-directory.sh
+# Description:   Display the default site-packages directory for python.
+# Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
+# Last Modified: Sun 2010-09-19 20:38:48 (-0400)
+
+# IMPORTS {{{1
+
+source bashful-messages
+
+# VARIABLES {{{1
+
+SCRIPT_NAME=$(basename "$0" .sh)
+SCRIPT_USAGE="Display the default distutils directory for python."
+SCRIPT_OPTIONS="-p PREFIX    Use PREFIX for distutils directory."
+
+PREFIX=${PREFIX:-$HOME/.local}
+
+# COMMAND-LINE OPTIONS {{{1
+
+unset OPTIND
+while getopts ":hp:" option; do
+    case $option in
+        p) PREFIX=$OPTARG ;;
+        h) usage 0 ;;
+        *) usage 1 ;;
+    esac
+done && shift $(($OPTIND - 1))
+
+#}}}1
+
+version=$(python --version 2>&1 | awk '{print $2}')
+
+echo "$PREFIX/lib/python$version/site-packages"
