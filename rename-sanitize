@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+
+"""Renames a bunch of files to a sanitized name."""
+
+__appname__ = 'rename-sanitize'
+__author__  = 'Jeremy Cantrell <jmcantrell@gmail.com>'
+__url__     = 'http://jmcantrell.me'
+__date__    = 'Fri 2010-06-25 00:42:31 (-0400)'
+
+import os, unicodeutils
+from scriptutils.options import Options
+
+def get_sane(fn):
+    fn = unicodeutils.decode(fn)
+    d, n = os.path.split(fn)
+    return unicodeutils.encode(os.path.join(d, unicodeutils.sanitize(n)))
+
+def get_options():
+    opts = Options(usage='Usage: %prog [options] file...')
+    opts.add_option('-v', '--verbose', action='store_true', help='Be verbose.')
+    opts.add_option('-n', '--dry-run', action='store_true', help='Dry run. Does nothing destructive.')
+    return opts.parse_args()
+
+def main():
+    opts, args = get_options()
+    seen = []
+    for fn in args:
+        nf = get_sane(fn)
+        if nf not in seen:
+            seen.append(nf)
+            print nf
+        if fn == nf: continue
+        if not opts.dry_run:
+            os.rename(fn, nf)
+
+if __name__ == '__main__': main()

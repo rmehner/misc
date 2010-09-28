@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# Filename:      journal.sh
+# Description:   Manages an encrypted journal (useful with journal.vim)
+# Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
+# Last Modified: Thu 2010-06-17 23:20:38 (-0400)
+
+# I wrote the journal.vim plugin to allow me to keep an encrypted journal.
+# Sometimes, I want to just open a new entry for today and start typing. This
+# script makes that easy, and is compatible with the vim plugin.
+
+source bashful-utils
+
+JOURNAL_DIR=${JOURNAL_DIR:-$HOME/journal}
+
+mkdir -p "$JOURNAL_DIR"
+
+# One file per day
+entry=$JOURNAL_DIR/$(date +%Y-%m-%d).asc
+
+{ # If it exists, decrypt it before adding the new entry
+    if [[ -f $entry ]]; then
+        gpg -d -q --use-agent "$entry"
+        echo; echo
+    fi
+    date; echo; echo
+} | gpg -r $GPG_DEFAULT_ID -a -e >$entry
+
+editor + "$entry"

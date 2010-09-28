@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+# Filename:      favorite-wallpaper.sh
+# Description:   Marks/unmarks wallpapers as favorite.
+# Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
+# Last Modified: Sun 2010-09-19 20:38:15 (-0400)
+
+# I wrote this script as a helper for my wallpaper manager, Wally, but I
+# suppose it could be useful for others.
+
+# IMPORTS {{{1
+
+source bashful-input
+source bashful-messages
+source bashful-modes
+source bashful-utils
+
+# FUNCTIONS {{{1
+
+is_favorite() #{{{2
+{
+    wallpaper-tags -l "$1" | grep -q '^favorite$' && return 0
+    return 1
+}
+
+# VARIABLES {{{1
+
+SCRIPT_NAME=$(basename "$0" .sh)
+SCRIPT_ARGS="[WALLPAPER...]"
+SCRIPT_USAGE="Marks/unmarks wallpapers as favorite."
+SCRIPT_OPTIONS="-r    Remove wallpaper(s) from favorites."
+
+# COMMAND-LINE OPTIONS {{{1
+
+unset OPTIND
+while getopts ":hr" option; do
+    case $option in
+        r) REMOVE=1 ;;
+        h) usage 0 ;;
+        *) usage 1 ;;
+    esac
+done && shift $(($OPTIND - 1))
+
+#}}}1
+
+for w in "$@"; do
+    # Make sure it's an absolute path
+    w=$(readlink -f "$w")
+
+    if truth $REMOVE; then
+        is_favorite "$w" || continue
+        question -p "Remove wallpaper '$w' from favorites?" || continue
+        wallpaper-tags -r -t favorite "$w"
+    else
+        is_favorite "$w" && continue
+        question -p "Add wallpaper '$w' to favorites?" || continue
+        wallpaper-tags -a -t favorite "$w"
+    fi
+done

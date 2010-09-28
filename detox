@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+
+__appname__ = 'detox.py'
+__author__  = 'Jeremy Cantrell <jmcantrell@gmail.com>'
+__url__     = 'http://jmcantrell.me'
+__date__    = 'Fri 2010-04-23 13:05:24 (-0400)'
+__license__ = 'BSD'
+
+import sys, unicodeutils
+from scriptutils.options import Options
+
+CASES = ['capitalize', 'lower', 'swapcase', 'title', 'upper']
+
+def get_options(): #{{{1
+    opts = Options()
+    opts.add_option('-s', '--sanitize', action='store_true', help='Produce super-clean and easy-to-read output.')
+    opts.add_option('--space-to-underscore', action='store_true', help='Replace spaces with underscores.')
+    opts.add_option('--squeeze', action='store_true', help='Squeeze consecutive underscores/spaces.')
+    opts.add_option('--strip-non-windows', action='store_true', help='Strip windows-incompatible characters.')
+    opts.add_option('--strip-non-ascii', action='store_true', help='Strip non-ascii characters.')
+    opts.add_option('--strip-non-word', action='store_true', help='Strip non-word characters.')
+    opts.add_option('--strip-replace', default='', help='String to use when replacing stripped characters.')
+    opts.add_option('--normalize', action='store_true', help='Normalize text.')
+    opts.add_option('--normalize-symbols', action='store_true', help='Normalize symbols.')
+    opts.add_option('--case', choices=CASES, help='Change case to CASE.')
+    return opts.parse_args()
+
+def main(): #{{{1
+    opts, args = get_options()
+    space = '_' if opts.space_to_underscore else ' '
+    replace = opts.strip_replace or ''
+    for line in sys.stdin:
+        line = unicodeutils.decode(line)
+        if opts.sanitize:
+            line = unicodeutils.sanitize(line)
+        else:
+            if opts.case:
+                line = getattr(line, opts.case)()
+            if opts.normalize:
+                line = unicodeutils.normalize(line)
+            if opts.normalize_symbols:
+                line = unicodeutils.normalize_symbols(line)
+            if opts.space_to_underscore:
+                line = line.replace(' ', '_')
+            if opts.strip_non_windows:
+                line = unicodeutils.strip_non_windows(line, replace)
+            if opts.strip_non_ascii:
+                line = unicodeutils.strip_non_ascii(line, replace)
+            if opts.strip_non_word:
+                line = unicodeutils.strip_non_word(line, replace)
+            if opts.squeeze:
+                line = unicodeutils.squeeze(line, space)
+        print unicodeutils.encode(line)
+
+#}}}1
+
+if __name__ == '__main__': main()

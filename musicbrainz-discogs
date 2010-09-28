@@ -1,0 +1,37 @@
+#!/usr/bin/env python
+
+"""Get the Discogs release ID for a MusicBrainz album ID."""
+
+__appname__ = 'musicbrainz-discogs.py'
+__author__  = 'Jeremy Cantrell <jmcantrell@gmail.com>'
+__url__     = 'http://jmcantrell.me'
+__date__    = 'Fri 2010-04-23 13:05:54 (-0400)'
+__license__ = 'BSD'
+
+import re
+from urllib import urlopen
+from scriptutils.options import Options
+
+MUSICBRAINS_URL_BASE = 'http://musicbrainz.org'
+MUSICBRAINS_URL_RELEASE = MUSICBRAINS_URL_BASE + '/release/%(album_id)s.html'
+
+def discogs_release_id(album_id): #{{{1
+    url = MUSICBRAINS_URL_RELEASE % {'album_id': album_id}
+    page = urlopen(url).read()
+    m = re.search(r'''discogs.com/release/(.*?)"''', page)
+    if m: return m.group(1)
+
+def get_options(): #{{{1
+    opts = Options(args='album-id...')
+    opts.add_option('-v', '--verbose', help='Be verbose.', action='store_true', default=False)
+    return opts.parse_args()
+
+def main(): #{{{1
+    opts, args = get_options()
+    for arg in args:
+        release_id = discogs_release_id(arg)
+        if release_id: print release_id
+
+#}}}1
+
+if __name__ == '__main__': main()

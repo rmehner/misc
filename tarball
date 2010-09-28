@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+# Filename:      tarball.sh
+# Description:   Create a tarball from given directories.
+# Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
+# Last Modified: Thu 2010-06-17 23:19:51 (-0400)
+
+source bashful-modes
+source bashful-utils
+
+verbose ${VERBOSE:-0}
+
+DIRECTORY=$PWD
+FORMAT="{{name}}"
+
+unset OPTIND
+while getopts ":hvqd:f:" option; do
+    case $option in
+        f) FORMAT=$OPTARG ;;
+        d) DIRECTORY=$OPTARG ;;
+        v) verbose 1 ;;
+        q) verbose 0 ;;
+        h) usage 0 ;;
+        *) usage 1 ;;
+    esac
+done && shift $(($OPTIND - 1))
+
+mkdir -p "$DIRECTORY"
+cd "$DIRECTORY"
+
+host=$HOSTNAME
+date=$(date +%Y%m%d)
+time=$(date +%H%M%S)
+datetime=${date}${time}
+
+vars=(
+    'name'
+    'host'
+    'date'
+    'time'
+    'datetime'
+)
+
+name=${1##*/}
+tgz=$(flatten "$FORMAT" "${vars[@]}").tar.gz
+
+verbose_execute tar -cvzf "$tgz" "$@"

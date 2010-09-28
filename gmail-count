@@ -1,0 +1,108 @@
+#!/usr/bin/env python
+
+import os
+
+from twisted.internet import gtk2reactor; gtk2reactor.install()
+from twisted.internet import reactor
+from twisted.words.protocols.jabber import jid
+
+from gtalk import MailChecker
+
+import gtk
+import gnomekeyring as gkey
+
+
+class Keyring(object):
+
+    def __init__(self, name, server, protocol):
+        self.name = name
+        self.server = server
+        self.protocol = protocol
+        self.keyring = gkey.get_default_keyring_sync()
+
+    def has_credentials(self):
+        try:
+            attrs = {
+                    "server": self.server,
+                    "protocol": self.protocol
+                    }
+            items = gkey.find_items_sync(gkey.ITEM_NETWORK_PASSWORD, attrs)
+            return len(items) > 0
+        except (gkey.DeniedError, gkey.NoMatchError):
+            return False
+
+    def get_credentials(self):
+        attrs = {
+                "server": self.server,
+                "protocol": self.protocol
+                }
+        items = gkey.find_items_sync(gkey.ITEM_NETWORK_PASSWORD, attrs)
+        return (items[0].attributes["user"], items[0].secret)
+
+    def delete_credentials(self):
+        attrs = {
+                "server": self.server,
+                "protocol": self.protocol
+                }
+        try:
+            items = gkey.find_items_sync(gkey.ITEM_NETWORK_PASSWORD, attrs)
+            for item in items:
+                gkey.item_delete_sync(None, item.item_id)
+        except (gkey.DeniedError, gkey.NoMatchError):
+            pass
+
+    def set_credentials(self, (user, pw)):
+        attrs = {
+                "user": user,
+                "server": self.server,
+                "protocol": self.protocol,
+                }
+        gkey.item_create_sync(
+                gkey.get_default_keyring_sync(),
+                gkey.ITEM_NETWORK_PASSWORD,
+                self._name, attrs, pw, True
+                )
+
+
+
+class GmailChecker(object):
+
+    def __init__(self):
+        self.dump_count(0)
+        self.keys = Keyring("GMail", "mail.google.com", "http")
+        self.creds = self.keys.get_credentials()
+        # check if we use Google Apps to start the correct webinterface
+        gmail_domains = ['gmail.com','googlemail.com']
+        self.jid = jid.JID(self.creds[0])
+        if self.jid.host in gmail_domains:
+            self.domain = None
+        else:
+            self.domain = self.jid.host
+        self.mailboxes = ["inbox"]
+        self.checker = MailChecker(
+                self.jid, self.creds[1], self.mailboxes[1:],
+                self.new_mail, self.update_count
+                )
+        self.checker.connect()
+        reactor.run()
+
+    def update_count(self, count):
+        c = 0
+        for mailbox in count.iteritems():
+            if mailbox[0] != "inbox": continue
+            c += int(mailbox[1])
+        self.dump_count(c)
+
+    def dump_count(self, count):
+        open(os.path.expanduser('~/.gmail-count'), 'w').write(str(count))
+
+    def new_mail(self, mails):
+        pass
+
+
+
+def main():
+    cm = GmailChecker()
+
+
+if __name__ == '__main__': main()

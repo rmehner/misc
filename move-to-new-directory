@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+# Filename:      move-to-new-directory.sh
+# Description:   Moves all given files to a new folder
+# Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
+# Last Modified: Fri 2010-06-18 00:24:04 (-0400)
+
+# While this can be used at the command line, it was intended to be used
+# within nautilus using eithe the scripts folder or nautilus-actions.
+#
+# I've often found myself creating a new directory, naming it, then moving a
+# bunch of files into it. This changes that workflow to simply selecting a
+# bunch of files, invoking the script and giving it the name of a directory.
+# It may not be immediately obvious how, but this script has saved me an
+# immense amount of time.
+
+(( $# == 0 )) && exit 1
+
+source bashful-input
+source bashful-utils
+
+if (( $# > 1 )); then
+    # If more than one file given, get the common prefix...
+    common=$(
+        for f in "$@"; do
+            basename "$f"
+        done | commonprefix
+        )
+else
+    # ... otherwise, just take the first word in the file.
+    common=${1%% *}
+fi
+
+name=$(input -d "$(trim <<<"$common")" -p "Enter directory") || exit 1
+dir=$PWD/$name
+
+mkdir -p "$dir"
+
+if [[ -d $dir ]]; then
+    # This will remove the name of the container directory from the beginning
+    # of each file. This is the most common scenario that I use.
+    if question -p "Strip common?"; then
+        for f in "$@"; do
+            new_f=$(basename "$f")
+            new_f=$(trim <<<"${new_f#$name}")
+            mv -nv "$f" "$dir/$new_f"
+        done
+    else
+        mv -nv "$@" "$dir"
+    fi
+fi

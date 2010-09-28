@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+
+"""Renames files to hashes based on contents."""
+
+__appname__ = 'rename-hash'
+__author__  = 'Jeremy Cantrell <jmcantrell@gmail.com>'
+__url__     = 'http://jmcantrell.me'
+__date__    = 'Fri 2010-06-25 00:42:27 (-0400)'
+
+HASHES = ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']
+
+import os, hashlib
+from scriptutils.options import Options
+
+def get_hash(fn, h):
+    d = os.path.dirname(fn)
+    ext = os.path.splitext(fn)[1]
+    m = getattr(hashlib, h)()
+    f = open(fn, 'rb')
+    while True:
+        data = f.read(8192)
+        if not len(data): break
+        m.update(data)
+    h = m.hexdigest()
+    return os.path.join(d, h+ext)
+
+def get_options():
+    opts = Options(usage='Usage: %prog [options] file...')
+    opts.add_option('-H', '--hash', default=HASHES[0], type='choice', choices=HASHES, help='Use HASH when renaming.')
+    opts.add_option('-n', '--dry-run', action='store_true', help='Dry run. Does nothing destructive.')
+    opts.add_option('-L', '--list', action='store_true', help='List available hash algorithms (default is first).')
+    return opts.parse_args()
+
+def main():
+    opts, args = get_options()
+    if opts.list:
+        print os.linesep.join(HASHES)
+        return
+    seen = []
+    for fn in args:
+        nf = get_hash(fn, opts.hash)
+        if nf not in seen:
+            seen.append(nf)
+            print nf
+        if fn == nf: continue
+        if not opts.dry_run:
+            os.rename(fn, nf)
+
+if __name__ == '__main__': main()

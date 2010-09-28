@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+# Filename:      manpage.sh
+# Description:   Finds all man page files for a given topic.
+# Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
+# Last Modified: Thu 2010-06-17 23:20:08 (-0400)
+
+# IMPORTS {{{1
+
+source bashful-messages
+
+# VARIABLES {{{1
+
+SCRIPT_NAME=$(basename "$0" .sh)
+SCRIPT_ARGS="TOPIC"
+SCRIPT_USAGE="Finds all man page files for a given topic."
+
+# COMMAND-LINE OPTIONS {{{1
+
+unset OPTIND
+while getopts ":h" option; do
+    case $option in
+        h) usage 0 ;;
+        *) usage 1 ;;
+    esac
+done && shift $(($OPTIND - 1))
+
+#}}}1
+
+TOPIC=$1
+
+[[ $TOPIC ]] || die "Topic not provided."
+
+OIFS=$IFS; IFS=:
+for dir in $(manpath -q); do
+    IFS=$OIFS
+    find "$dir" -iname "$TOPIC.*" 2>/dev/null
+done

@@ -1,0 +1,41 @@
+#!/usr/bin/env python
+
+"""Renames a bunch of files to a different case."""
+
+__appname__ = 'rename-case'
+__author__  = 'Jeremy Cantrell <jmcantrell@gmail.com>'
+__url__     = 'http://jmcantrell.me'
+__date__    = 'Fri 2010-06-25 00:42:35 (-0400)'
+
+CASES = ['lower', 'upper', 'capitalize', 'swapcase']
+
+import os
+from scriptutils.options import Options
+
+def get_case(fn, case):
+    d, n = os.path.split(fn)
+    return os.path.join(d, getattr(n, case)())
+
+def get_options():
+    opts = Options(usage='Usage: %prog [options] file...')
+    opts.add_option('-C', '--case', default=CASES[0], type='choice', choices=CASES, help='Use CASE when renaming.')
+    opts.add_option('-n', '--dry-run', action='store_true', help='Dry run. Does nothing destructive.')
+    opts.add_option('-L', '--list', action='store_true', help='List available cases (default is first).')
+    return opts.parse_args()
+
+def main():
+    opts, args = get_options()
+    if opts.list:
+        print os.linesep.join(CASES)
+        return
+    seen = []
+    for fn in args:
+        nf = get_case(fn, opts.case)
+        if nf not in seen:
+            seen.append(nf)
+            print nf
+        if fn == nf: continue
+        if not opts.dry_run:
+            os.rename(fn, nf)
+
+if __name__ == '__main__': main()

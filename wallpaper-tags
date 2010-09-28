@@ -1,0 +1,138 @@
+#!/usr/bin/env bash
+
+# Filename:      wallpaper-tags.sh
+# Description:   Manages tags for a wallpaper collection.
+# Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
+# Last Modified: Sun 2010-09-19 20:38:37 (-0400)
+
+# IMPORTS {{{1
+
+source bashful-input
+source bashful-messages
+
+# FUNCTIONS {{{1
+
+wallpaper_type() #{{{2
+{
+    for t in "${WALLPAPER_TYPES[@]}"; do
+        local wd=${WALLPAPER_DIR%%/}/$t
+        local fd=${FAVORITES_DIR%%/}/$t
+        if [[ $1 == $wd/* || $1 == $fd/* ]]; then
+            echo "$t"
+            return 0
+        fi
+    done
+    return 1
+}
+
+fix_tags() #{{{2
+{
+    local wt tdir wdir
+    for wt in "${WALLPAPER_TYPES[@]}"; do
+        tdir=$TAGS_DIR/$wt
+        wdir=$WALLPAPER_DIR/$wt
+        [[ -d $tdir && -d $wdir ]] || continue
+        info -x "Repairing tags for '$wt'..."
+        pathtags -d "$tdir" --repair="$wdir"
+    done
+}
+
+sort_tags() #{{{2
+{
+    sort -u | grep -v '^[[:space:]]*$'
+}
+
+is_wallpaper() #{{{2
+{
+    local filename=$1
+    [[ $filename == ${WALLPAPER_DIR%%/}/* ]] && return 0
+    return 1
+}
+
+list_tags() #{{{2
+{
+    if (( $# > 0 )); then
+        for fn in "$@"; do
+            is_wallpaper "$fn" || continue
+            wt=$(wallpaper_type "$fn")
+            pathtags -d "$TAGS_DIR/$wt" --list-tags "$(readlink -f "$fn")"
+        done | sort_tags
+    else
+        for wt in "${WALLPAPER_TYPES[@]}"; do
+            dir=$TAGS_DIR/$wt
+            pathtags -d "$dir" --list-tags
+        done | sort_tags
+    fi
+}
+
+change_tags() #{{{2
+{
+    local action=$1; shift
+    for fn in "$@"; do
+        is_wallpaper "$fn" || continue
+        wt=$(wallpaper_type "$fn") || continue
+        pathtags -d "$TAGS_DIR/$wt" $action "${TAGS_OPTS[@]}" "$fn"
+    done
+}
+
+# VARIABLES {{{1
+
+SCRIPT_NAME=$(basename "$0" .sh)
+SCRIPT_ARGS="[FILE...]"
+SCRIPT_USAGE="Manages tags for a wallpaper collection."
+SCRIPT_OPTIONS="
+-h         Display this help message.
+
+-t TAGS    Use TAGS for tags.
+-l         List tags for a wallpaper.
+-a         Add tags to a wallpaper.
+-r         Remove tags from a wallpaper.
+-f         Fix broken symlinks.
+"
+
+WALLPAPER_TYPES=(netbook standard widescreen)
+WALLPAPER_DIR=$HOME/Wallpapers
+TAGS_DIR=$WALLPAPER_DIR/tags
+
+# COMMAND-LINE OPTIONS {{{1
+
+unset OPTIND
+while getopts ":hlt:arf" option; do
+    case $option in
+        t) TAGS_STR=$OPTARG ;;
+
+        l) ACTION=list ;;
+        a) ACTION=add ;;
+        r) ACTION=remove ;;
+        f) ACTION=fix ;;
+
+        h) usage 0 ;;
+        *) usage 1 ;;
+    esac
+done && shift $(($OPTIND - 1))
+
+#}}}1
+
+if [[ $ACTION == add || $ACTION == remove ]]; then
+    if [[ ! $TAGS_STR ]]; then
+        OIFS=$IFS; IFS=$'\n'
+        TAGS=($(input_lines -p "Enter tags to $ACTION"))
+        IFS=$OIFS
+    else
+        TAGS=($(split_string <<<"$TAGS_STR"))
+    fi
+fi
+
+TAGS_OPTS=()
+OIFS=$IFS; IFS=$'\n'
+for t in "${TAGS[@]}"; do
+    IFS=$OIFS
+    TAGS_OPTS=("${TAGS_OPTS[@]}" -t "$t")
+done
+
+case $ACTION in
+    fix)    fix_tags            ;;
+    list)   list_tags      "$@" ;;
+    add)    change_tags -a "$@" ;;
+    remove) change_tags -r "$@" ;;
+esac

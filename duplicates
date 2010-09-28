@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+
+__appname__ = 'duplicates.py'
+__author__  = 'Jeremy Cantrell <jmcantrell@gmail.com>'
+__url__     = 'http://jmcantrell.me'
+__date__    = 'Fri 2010-04-23 13:05:51 (-0400)'
+__license__ = 'BSD'
+
+import os, hashlib
+
+def md5sum(fn):
+    md5 = hashlib.md5()
+    f = open(fn, 'rb')
+    while True:
+        data = f.read(128)
+        if not data: break
+        md5.update(data)
+    return md5.hexdigest()
+
+from scriptutils.options import Options
+
+def get_options():
+    opts = Options('Usage: %prog [options]', width=45)
+    opts.add_option('-d', '--directory', default='.', help='Search DIRECTORY for duplicates.')
+    return opts.parse_args()
+
+def main():
+    opts, args = get_options()
+    hashes = {}
+    for root, dirs, files in os.walk(os.path.expanduser(opts.directory)):
+        for f in files:
+            fn = os.path.join(root, f)
+            hashes.setdefault(md5sum(fn), []).append(fn)
+    for k, v in hashes.items():
+        if len(v) > 1:
+            print '%s: %s' % (k, ', '.join(v))
+
+
+if __name__ == '__main__': main()

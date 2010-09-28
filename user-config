@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+# Filename:      user-config.sh
+# Description:   Toggles a config dir/file.
+# Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
+# Last Modified: Thu 2010-06-17 23:19:45 (-0400)
+
+# IMPORTS {{{1
+
+source bashful-messages
+source bashful-modes
+
+# FUNCTIONS {{{1
+
+config_on() #{{{2
+{
+    info "Enabling config '$CONFIG'."
+    if [[ -e $DISABLED_DIR/$CONFIG || -L $DISABLED_DIR/$CONFIG ]]; then
+        mv "$DISABLED_DIR/$CONFIG" "$HOME"
+    fi
+}
+
+config_off() #{{{2
+{
+    info "Disabling config '$CONFIG'."
+    if [[ -e $HOME/$CONFIG || -L $HOME/$CONFIG ]]; then
+        mv "$HOME/$CONFIG" "$DISABLED_DIR"
+    fi
+}
+
+# VARIABLES {{{1
+
+SCRIPT_NAME=$(basename "$0" .sh)
+SCRIPT_USAGE="Toggles a config dir/file."
+
+DISABLED_DIR=$HOME/.disabled
+
+interactive ${INTERACTIVE:-1}
+verbose     ${VERBOSE:-1}
+
+# COMMAND-LINE OPTIONS {{{1
+
+unset OPTIND
+while getopts ":hifvq" option; do
+    case $option in
+        i) interactive 1 ;;
+        f) interactive 0 ;;
+
+        v) verbose 1 ;;
+        q) verbose 0 ;;
+
+        h) usage 0 ;;
+        *) usage 1 ;;
+    esac
+done && shift $(($OPTIND - 1))
+
+#}}}1
+
+CONFIG=$1
+
+[[ $CONFIG ]] || die "Config not provided."
+
+[[ -d $DISABLED_DIR ]] || mkdir -p "$DISABLED_DIR"
+
+case $2 in
+    on)  config_on  ;;
+    off) config_off ;;
+    *)   usage 1    ;;
+esac

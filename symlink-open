@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+# Filename:      symlink-open.sh
+# Description:   Open a symlink's target in the appropriate viewer
+# Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
+# Last Modified: Sun 2010-09-19 20:38:28 (-0400)
+
+# IMPORTS {{{1
+
+source bashful-messages
+
+# VARIABLES {{{1
+
+SCRIPT_NAME=$(basename "$0" .sh)
+SCRIPT_ARGS="SYMLINK"
+SCRIPT_USAGE="Open a symlink's target in the appropriate viewer."
+SCRIPT_OPTIONS="
+-c COMMAND    Use COMMAND to open the file.
+-d            Open the symlink target's containing directory.
+"
+
+COMMAND=xdg-open
+
+# COMMAND-LINE OPTIONS {{{1
+
+unset OPTIND
+while getopts ":hc:d" option; do
+    case $option in
+        c) COMMAND=$OPTARG ;;
+        d) DIRECTORY=1 ;;
+        h) usage 0 ;;
+        *) usage 1 ;;
+    esac
+done && shift $(($OPTIND - 1))
+
+#}}}1
+
+FILENAME=$(readlink -f "$1")
+
+[[ $DIRECTORY ]] && FILENAME=$(dirname "$FILENAME")
+
+$COMMAND "$FILENAME"

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# Filename:      mangrep.sh
+# Description:   Grep man pages.
+# Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
+# Last Modified: Thu 2010-06-17 23:20:13 (-0400)
+
+OIFS=$IFS; IFS=:
+for dir in $(manpath -g); do
+    IFS=$OIFS
+    [[ -d $dir ]] && find "$dir" -type f -exec zgrep -l "$@" {} \;
+done

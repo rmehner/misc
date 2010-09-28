@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# Filename:      trash.sh
+# Description:   Safely delete files to the Gnome trash.
+# Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
+# Last Modified: Thu 2010-06-17 23:19:47 (-0400)
+
+source bashful-files
+
+SCRIPT_NAME=$(basename "$0" .sh)
+SCRIPT_ARGS="FILE..."
+SCRIPT_USAGE="Safely delete files to the Gnome trash"
+
+interactive ${INTERACTIVE:-1}
+verbose     ${VERBOSE:-1}
+
+unset OPTIND
+while getopts ":hifvq" option; do
+    case $option in
+        i) interactive 1 ;;
+        f) interactive 0 ;;
+        v) verbose 1 ;;
+        q) verbose 0 ;;
+        h) usage 0 ;;
+        *) usage 1 ;;
+    esac
+done && shift $(($OPTIND - 1))
+
+trash "$@"
