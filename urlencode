@@ -4,22 +4,24 @@
 
 __author__  = 'Jeremy Cantrell <jmcantrell@gmail.com>'
 __url__     = 'http://jmcantrell.me'
-__date__    = 'Fri 2010-04-23 13:05:13 (-0400)'
+__date__    = 'Mon 2010-10-18 23:16:35 (-0400)'
 __license__ = 'BSD'
 
 import sys, urllib
 from itertools import chain, repeat, izip
-from scriptutils.options import Options
+from scriptutils.arguments import Arguments
 
 def grouper(n, itr, pad=None): #{{{1
     return izip(*[chain(itr, repeat(pad, n-1))]*n)
 
-def get_options(): #{{{1
-    return Options(args='[key value...]').parse_args()
+def get_arguments(): #{{{1
+    a = Arguments(description="URL encodes key-value pairs.")
+    a.add_argument('key_values', nargs='+', metavar='KEY-VALUE', help='a key and value pair to encode')
+    return a.parse_args()
 
 def main(): #{{{1
-    opts, args = get_options()
-    print urllib.urlencode(dict(grouper(2, sys.argv[1:])))
+    args = get_arguments()
+    print urllib.urlencode(dict(grouper(2, args.key_values)))
 
 #}}}1
 

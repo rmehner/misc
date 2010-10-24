@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-# Filename:      mangrep.sh
+# Filename:      mangrep
 # Description:   Grep man pages.
 # Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
-# Last Modified: Thu 2010-06-17 23:20:13 (-0400)
+# Last Modified: Sun 2010-10-03 02:59:24 (-0400)
 
 OIFS=$IFS; IFS=:
 for dir in $(manpath -g); do

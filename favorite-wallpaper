@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-# Filename:      favorite-wallpaper.sh
+# Filename:      favorite-wallpaper
 # Description:   Marks/unmarks wallpapers as favorite.
 # Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
-# Last Modified: Sun 2010-09-19 20:38:15 (-0400)
+# Last Modified: Sun 2010-10-03 02:57:01 (-0400)
 
 # I wrote this script as a helper for my wallpaper manager, Wally, but I
 # suppose it could be useful for others.
@@ -26,7 +26,7 @@ is_favorite() #{{{2
 # VARIABLES {{{1
 
 SCRIPT_NAME=$(basename "$0" .sh)
-SCRIPT_ARGS="[WALLPAPER...]"
+SCRIPT_ARGUMENTS="[WALLPAPER...]"
 SCRIPT_USAGE="Marks/unmarks wallpapers as favorite."
 SCRIPT_OPTIONS="-r    Remove wallpaper(s) from favorites."
 

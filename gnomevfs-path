@@ -5,22 +5,24 @@
 __appname__ = 'gnomevfs-path.py'
 __author__  = 'Jeremy Cantrell <jmcantrell@gmail.com>'
 __url__     = 'http://jmcantrell.me'
-__date__    = 'Fri 2010-04-23 13:05:41 (-0400)'
+__date__    = 'Mon 2010-10-18 23:23:34 (-0400)'
 __license__ = 'BSD'
 
 import gnomevfs
-from scriptutils.options import Options
+from scriptutils.arguments import Arguments
 
-def get_options(): #{{{1
-    return Options(args='[path...]').parse_args()
+def get_arguments(): #{{{1
+    a = Arguments(description="Get the path from a GnomeVFS URI.")
+    a.add_argument('paths', nargs='+', metavar='PATH', 'a path to translate')
+    return a.parse_args()
 
 def main(): #{{{1
-    opts, args = get_options()
-    for arg in args:
+    args = get_arguments()
+    for p in args.paths:
         try:
-            print gnomevfs.get_local_path_from_uri(arg)
+            print gnomevfs.get_local_path_from_uri(p)
         except RuntimeError:
-            print arg
+            print p
 
 #}}}1
 

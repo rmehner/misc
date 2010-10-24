@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
-# Filename:      trash.sh
+# Filename:      trash
 # Description:   Safely delete files to the Gnome trash.
 # Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
-# Last Modified: Thu 2010-06-17 23:19:47 (-0400)
+# Last Modified: Sun 2010-10-03 02:57:25 (-0400)
 
 source bashful-files
 
 SCRIPT_NAME=$(basename "$0" .sh)
-SCRIPT_ARGS="FILE..."
+SCRIPT_ARGUMENTS="FILE..."
 SCRIPT_USAGE="Safely delete files to the Gnome trash"
 
 interactive ${INTERACTIVE:-1}

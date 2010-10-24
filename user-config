@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-# Filename:      user-config.sh
+# Filename:      user-config
 # Description:   Toggles a config dir/file.
 # Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
-# Last Modified: Thu 2010-06-17 23:19:45 (-0400)
+# Last Modified: Sun 2010-10-03 02:59:05 (-0400)
 
 # IMPORTS {{{1
 

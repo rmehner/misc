@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-# Filename:      journal.sh
+# Filename:      journal
 # Description:   Manages an encrypted journal (useful with journal.vim)
 # Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
-# Last Modified: Thu 2010-06-17 23:20:38 (-0400)
+# Last Modified: Sun 2010-10-03 02:59:33 (-0400)
 
 # I wrote the journal.vim plugin to allow me to keep an encrypted journal.
 # Sometimes, I want to just open a new entry for today and start typing. This

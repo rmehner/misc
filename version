@@ -4,11 +4,11 @@
 
 __author__  = 'Jeremy Cantrell <jmcantrell@gmail.com>'
 __url__     = 'http://jmcantrell.me'
-__date__    = 'Fri 2010-04-23 13:05:33 (-0400)'
+__date__    = 'Tue 2010-10-19 00:15:03 (-0400)'
 __license__ = 'BSD'
 
 import os, sys
-from scriptutils.options import Options
+from scriptutils.arguments import Arguments
 
 def split_version(version): #{{{1
     return list(int(i) for i in version.split('.'))
@@ -24,31 +24,32 @@ def increment_version(version, idx): #{{{1
         version[i] = 0
     return version
 
-def get_options(): #{{{1
-    opts = Options(args='[version...]')
-    opts.add_option('-M', '--major',   action='store_true', help='Add to major version.')
-    opts.add_option('-m', '--minor',   action='store_true', help='Add to minor version.')
-    opts.add_option('-b', '--build',   action='store_true', help='Add to build version.')
-    opts.add_option('-s', '--sort',    action='store_true', help='Sort.')
-    opts.add_option('-r', '--reverse', action='store_true', help='Reverse order.')
-    return opts.parse_args()
+def get_arguments(): #{{{1
+    a = Arguments(description="Utility for working with version strings.")
+    a.add_argument('versions', nargs='+', metavar='VERSION', help='a version string to work with')
+    a.add_argument('-M', '--major',   action='store_true', help='add to major version')
+    a.add_argument('-m', '--minor',   action='store_true', help='add to minor version')
+    a.add_argument('-b', '--build',   action='store_true', help='add to build version')
+    a.add_argument('-s', '--sort',    action='store_true', help='sort versions')
+    a.add_argument('-r', '--reverse', action='store_true', help='reverse order')
+    return a.parse_args()
 
 def main(): #{{{1
-    opts, args = get_options()
+    args = get_arguments()
 
-    if len(args):
-        versions = args
+    if len(args.versions):
+        versions = args.versions
     else:
         versions = sys.stdin.readlines()
 
     versions = [split_version(v) for v in versions]
 
-    if opts.build: versions = [increment_version(v, 2) for v in versions]
-    if opts.minor: versions = [increment_version(v, 1) for v in versions]
-    if opts.major: versions = [increment_version(v, 0) for v in versions]
+    if args.build: versions = [increment_version(v, 2) for v in versions]
+    if args.minor: versions = [increment_version(v, 1) for v in versions]
+    if args.major: versions = [increment_version(v, 0) for v in versions]
 
-    if opts.sort:    versions.sort()
-    if opts.reverse: versions.reverse()
+    if args.sort:    versions.sort()
+    if args.reverse: versions.reverse()
 
     versions = [join_version(v) for v in versions]
 

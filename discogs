@@ -4,12 +4,12 @@
 
 __author__  = 'Jeremy Cantrell <jmcantrell@gmail.com>'
 __url__     = 'http://jmcantrell.me'
-__date__    = 'Fri 2010-04-23 13:05:36 (-0400)'
+__date__    = 'Mon 2010-10-18 23:28:09 (-0400)'
 __license__ = 'BSD'
 
 import urllib, urllib2, gzip, cStringIO
 import xml.etree.ElementTree as ET
-from scriptutils.options import Options
+from scriptutils.arguments import Arguments
 
 DISCOGS_API_KEY = 'f1e79f104f'
 MULTI_DELIMITER = ' / '
@@ -20,20 +20,20 @@ def urlopen_gzip(url): #{{{1
     data = urllib2.urlopen(req).read()
     return gzip.GzipFile(fileobj=cStringIO.StringIO(data))
 
-def get_options(): #{{{1
-    opts = Options()
-    opts.add_option('-v', '--verbose', action='store_true', default=False, help='Be verbose.')
-    opts.add_option('-r', '--release', help='Set release.')
-    opts.add_option('-q', '--query', help='Display a specific attribute.')
-    return opts.parse_args()
+def get_arguments(): #{{{1
+    a = Arguments(description="Python interface to the Discogs music information database")
+    a.add_argument('-v', '--verbose', action='store_true', default=False, help='be verbose')
+    a.add_argument('-r', '--release', help='set release')
+    a.add_argument('-q', '--query', help='display a specific attribute')
+    return a.parse_args()
 
 def main(): #{{{1
-    opts, args = get_options()
+    args = get_arguments()
     d = Discogs(DISCOGS_API_KEY)
-    if opts.release:
-        release = d.release(opts.release)
-        if opts.query:
-            query = getattr(release, opts.query)
+    if args.release:
+        release = d.release(args.release)
+        if args.query:
+            query = getattr(release, args.query)
             if type(query) in (tuple, list):
                 print MULTI_DELIMITER.join(query)
             else:

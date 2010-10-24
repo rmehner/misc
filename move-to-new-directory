@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-# Filename:      move-to-new-directory.sh
+# Filename:      move-to-new-directory
 # Description:   Moves all given files to a new folder
 # Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
-# Last Modified: Fri 2010-06-18 00:24:04 (-0400)
+# Last Modified: Sun 2010-10-03 02:59:17 (-0400)
 
 # While this can be used at the command line, it was intended to be used
 # within nautilus using eithe the scripts folder or nautilus-actions.

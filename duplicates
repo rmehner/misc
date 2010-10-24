@@ -3,10 +3,11 @@
 __appname__ = 'duplicates.py'
 __author__  = 'Jeremy Cantrell <jmcantrell@gmail.com>'
 __url__     = 'http://jmcantrell.me'
-__date__    = 'Fri 2010-04-23 13:05:51 (-0400)'
+__date__    = 'Mon 2010-10-18 23:25:54 (-0400)'
 __license__ = 'BSD'
 
 import os, hashlib
+from scriptutils.arguments import Arguments
 
 def md5sum(fn):
     md5 = hashlib.md5()
@@ -17,17 +18,15 @@ def md5sum(fn):
         md5.update(data)
     return md5.hexdigest()
 
-from scriptutils.options import Options
-
-def get_options():
-    opts = Options('Usage: %prog [options]', width=45)
-    opts.add_option('-d', '--directory', default='.', help='Search DIRECTORY for duplicates.')
-    return opts.parse_args()
+def get_arguments():
+    a = Arguments(description="Finds duplicate files.")
+    a.add_argument('-d', '--directory', default='.', help='Search DIRECTORY for duplicates.')
+    return a.parse_args()
 
 def main():
-    opts, args = get_options()
+    args = get_arguments()
     hashes = {}
-    for root, dirs, files in os.walk(os.path.expanduser(opts.directory)):
+    for root, dirs, files in os.walk(os.path.expanduser(args.directory)):
         for f in files:
             fn = os.path.join(root, f)
             hashes.setdefault(md5sum(fn), []).append(fn)

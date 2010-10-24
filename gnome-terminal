@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-# Filename:      gnome-terminal.sh
+# Filename:      gnome-terminal
 # Description:   Hack for truly getting rid of gnome-terminal.
 # Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
-# Last Modified: Thu 2010-06-17 23:20:44 (-0400)
+# Last Modified: Sun 2010-10-03 02:59:39 (-0400)
 
 # There are way too many projects out there that hardcode 'gnome-terminal'
 # when they should be using 'x-terminal-emulator'. This annoys the shit out of

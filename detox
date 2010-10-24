@@ -3,52 +3,52 @@
 __appname__ = 'detox.py'
 __author__  = 'Jeremy Cantrell <jmcantrell@gmail.com>'
 __url__     = 'http://jmcantrell.me'
-__date__    = 'Fri 2010-04-23 13:05:24 (-0400)'
+__date__    = 'Sun 2010-10-24 00:42:06 (-0400)'
 __license__ = 'BSD'
 
 import sys, unicodeutils
-from scriptutils.options import Options
+from scriptutils.arguments import Arguments
 
 CASES = ['capitalize', 'lower', 'swapcase', 'title', 'upper']
 
-def get_options(): #{{{1
-    opts = Options()
-    opts.add_option('-s', '--sanitize', action='store_true', help='Produce super-clean and easy-to-read output.')
-    opts.add_option('--space-to-underscore', action='store_true', help='Replace spaces with underscores.')
-    opts.add_option('--squeeze', action='store_true', help='Squeeze consecutive underscores/spaces.')
-    opts.add_option('--strip-non-windows', action='store_true', help='Strip windows-incompatible characters.')
-    opts.add_option('--strip-non-ascii', action='store_true', help='Strip non-ascii characters.')
-    opts.add_option('--strip-non-word', action='store_true', help='Strip non-word characters.')
-    opts.add_option('--strip-replace', default='', help='String to use when replacing stripped characters.')
-    opts.add_option('--normalize', action='store_true', help='Normalize text.')
-    opts.add_option('--normalize-symbols', action='store_true', help='Normalize symbols.')
-    opts.add_option('--case', choices=CASES, help='Change case to CASE.')
-    return opts.parse_args()
+def get_arguments(): #{{{1
+    a = Arguments(description="Clean text from standard input.")
+    a.add_argument('-s', '--sanitize', action='store_true', help='produce super-clean and easy-to-read output')
+    a.add_argument('--space-to-underscore', action='store_true', help='replace spaces with underscores')
+    a.add_argument('--squeeze', action='store_true', help='squeeze consecutive underscores/spaces')
+    a.add_argument('--strip-non-windows', action='store_true', help='strip windows-incompatible characters')
+    a.add_argument('--strip-non-ascii', action='store_true', help='strip non-ascii characters')
+    a.add_argument('--strip-non-word', action='store_true', help='strip non-word characters')
+    a.add_argument('--strip-replace', default='', help='string to use when replacing stripped characters')
+    a.add_argument('--normalize', action='store_true', help='normalize text')
+    a.add_argument('--normalize-symbols', action='store_true', help='normalize symbols')
+    a.add_argument('--case', choices=CASES, help='change case to CASE')
+    return a.parse_args()
 
 def main(): #{{{1
-    opts, args = get_options()
-    space = '_' if opts.space_to_underscore else ' '
-    replace = opts.strip_replace or ''
+    args = get_arguments()
+    space = '_' if args.space_to_underscore else ' '
+    replace = args.strip_replace or ''
     for line in sys.stdin:
         line = unicodeutils.decode(line)
-        if opts.sanitize:
+        if args.sanitize:
             line = unicodeutils.sanitize(line)
         else:
-            if opts.case:
-                line = getattr(line, opts.case)()
-            if opts.normalize:
+            if args.case:
+                line = getattr(line, args.case)()
+            if args.normalize:
                 line = unicodeutils.normalize(line)
-            if opts.normalize_symbols:
+            if args.normalize_symbols:
                 line = unicodeutils.normalize_symbols(line)
-            if opts.space_to_underscore:
+            if args.space_to_underscore:
                 line = line.replace(' ', '_')
-            if opts.strip_non_windows:
+            if args.strip_non_windows:
                 line = unicodeutils.strip_non_windows(line, replace)
-            if opts.strip_non_ascii:
+            if args.strip_non_ascii:
                 line = unicodeutils.strip_non_ascii(line, replace)
-            if opts.strip_non_word:
+            if args.strip_non_word:
                 line = unicodeutils.strip_non_word(line, replace)
-            if opts.squeeze:
+            if args.squeeze:
                 line = unicodeutils.squeeze(line, space)
         print unicodeutils.encode(line)
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-# Filename:      symlink-open.sh
+# Filename:      symlink-open
 # Description:   Open a symlink's target in the appropriate viewer
 # Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
-# Last Modified: Sun 2010-09-19 20:38:28 (-0400)
+# Last Modified: Sun 2010-10-03 02:57:16 (-0400)
 
 # IMPORTS {{{1
 
@@ -12,7 +12,7 @@ source bashful-messages
 # VARIABLES {{{1
 
 SCRIPT_NAME=$(basename "$0" .sh)
-SCRIPT_ARGS="SYMLINK"
+SCRIPT_ARGUMENTS="SYMLINK"
 SCRIPT_USAGE="Open a symlink's target in the appropriate viewer."
 SCRIPT_OPTIONS="
 -c COMMAND    Use COMMAND to open the file.

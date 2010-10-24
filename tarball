@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-# Filename:      tarball.sh
+# Filename:      tarball
 # Description:   Create a tarball from given directories.
 # Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
-# Last Modified: Thu 2010-06-17 23:19:51 (-0400)
+# Last Modified: Sun 2010-10-03 02:59:12 (-0400)
 
 source bashful-modes
 source bashful-utils
